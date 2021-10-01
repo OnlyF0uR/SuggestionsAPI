@@ -20,7 +20,7 @@ const authTokens: any = config.authTokens
  */
 router.post('/submit', async (ctx: any) => {
     // Get api key
-    const apiKey = ctx.request.headers.get('api-key')
+    const apiKey = ctx.request.headers.get('Api-Key')
     // Check api key validity
     if (apiKey == null || authTokens[apiKey] == null) {
         ctx.response.body = JSON.stringify({ success: false, error: 'Invalid token.' })
@@ -66,7 +66,7 @@ router.post('/submit', async (ctx: any) => {
  */
 router.post('/setstatus', async (ctx: any) => {
     // Get api key
-    const apiKey = ctx.request.headers.get('api-key')
+    const apiKey = ctx.request.headers.get('Api-Key')
     // Check api key validity
     if (apiKey == null || authTokens[apiKey] == null) {
         ctx.response.body = JSON.stringify({ success: false, error: 'Invalid token.' })
@@ -106,7 +106,7 @@ router.post('/setstatus', async (ctx: any) => {
  */
 router.post('/suggestions/upvote', async (ctx: any) => {
     // Get api key
-    const apiKey = ctx.request.headers.get('api-key')
+    const apiKey = ctx.request.headers.get('Api-Key')
     // Check api key validity
     if (apiKey == null || authTokens[apiKey] == null) {
         ctx.response.body = JSON.stringify({ success: false, error: 'Invalid token.' })
@@ -139,7 +139,7 @@ router.post('/suggestions/upvote', async (ctx: any) => {
  */
 router.post('/suggestions/downvote', async (ctx: any) => {
     // Get api key
-    const apiKey = ctx.request.headers.get('api-key')
+    const apiKey = ctx.request.headers.get('Api-Key')
     // Check api key validity
     if (apiKey == null || authTokens[apiKey] == null) {
         ctx.response.body = JSON.stringify({ success: false, error: 'Invalid token.' })
@@ -171,7 +171,7 @@ router.post('/suggestions/downvote', async (ctx: any) => {
  */
 router.get('/fetch/:guild_id/:id', async (ctx: any) => {
     // Get api key
-    const apiKey = ctx.request.headers.get('api-key')
+    const apiKey = ctx.request.headers.get('Api-Key')
     // Check api key validity
     if (apiKey == null || authTokens[apiKey] == null) {
         ctx.response.body = JSON.stringify({ success: false, error: 'Invalid token.' })
@@ -205,7 +205,7 @@ router.get('/fetch/:guild_id/:id', async (ctx: any) => {
  */
 router.get('/fetchall/:guild_id', async (ctx: any) => {
     // Get api key
-    const apiKey = ctx.request.headers.get('api-key')
+    const apiKey = ctx.request.headers.get('Api-Key')
     // Check api key validity
     if (apiKey == null || authTokens[apiKey] == null) {
         ctx.response.body = JSON.stringify({ success: false, error: 'Invalid token.' })
