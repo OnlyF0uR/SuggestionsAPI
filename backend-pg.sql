@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS suggestions (
     status VARCHAR(20) NOT NULL,
     upvotes TEXT NOT NULL,
     downvotes TEXT NOT NULL,
-    timestamp TIMESTAMP NOT NULL
-)
+    created_at BIGINT NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS reports (
     id TEXT PRIMARY KEY NOT NULL, -- r_abc45
@@ -20,6 +20,6 @@ CREATE TABLE IF NOT EXISTS reports (
     guild TEXT NOT NULL,
     channel TEXT NOT NULL,
     message TEXT NOT NULL,
-    status INT NOT NULL,
-    timestamp TIMESTAMP NOT NULL
-)
+    status VARCHAR(20) NOT NULL,
+    created_at BIGINT NOT NULL
+);
