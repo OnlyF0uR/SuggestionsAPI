@@ -91,12 +91,10 @@ router.post('/setstatus', async (ctx: any) => {
     }
 
     if (body.id.startsWith('s_')) {
-        const res = await runQuery('UPDATE suggestions SET status = $1 WHERE guild = $2 AND id = $3', [body.status, body.guild, body.id])
-        console.log('TEST: ' + res)
+        await runQuery('UPDATE suggestions SET status = $1 WHERE guild = $2 AND id = $3', [body.status, body.guild, body.id])
         ctx.response.body = stringify({ success: true })
     } else if (body.id.startsWith('r_')) {
-        const res = await runQuery('UPDATE reports SET status = $1 WHERE guild = $2 AND id = $3', [body.status, body.guild, body.id])
-        console.log('TEST: ' + res)
+        await runQuery('UPDATE reports SET status = $1 WHERE guild = $2 AND id = $3', [body.status, body.guild, body.id])
         ctx.response.body = stringify({ success: true })
     } else {
         ctx.response.body = stringify({ success: false, error: 'ID parameter was invalid.' })
