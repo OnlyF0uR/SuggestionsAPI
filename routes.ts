@@ -91,13 +91,23 @@ router.post('/setstatus', async (ctx: any) => {
     }
 
     if (body.id.startsWith('s_')) {
-        await runQuery('UPDATE suggestions SET status = $1 WHERE guild = $2 AND id = $3', [body.status, body.guild, body.id])
-        ctx.response.body = stringify({ success: true })
+        const res = await runQuery('UPDATE suggestions SET status = $1 WHERE guild = $2 AND id = $3', [body.status, body.guild, body.id])
+        if (res.rowCount) {
+            const msgRes = await runQuery('SELECT message FROM suggestions WHERE guild = $1 AND id = $2', [body.guild, body.id])
+            ctx.response.body = stringify({ success: true, messageId: msgRes.rows.message })
+        } else {
+            ctx.response.body = stringify({ success: false, error: 'No suggestion found with that ID.' })
+        }
     } else if (body.id.startsWith('r_')) {
-        await runQuery('UPDATE reports SET status = $1 WHERE guild = $2 AND id = $3', [body.status, body.guild, body.id])
-        ctx.response.body = stringify({ success: true })
+        const res = await runQuery('UPDATE reports SET status = $1 WHERE guild = $2 AND id = $3', [body.status, body.guild, body.id])
+        if (res.rowCount) {
+            const msgRes = await runQuery('SELECT message FROM reports WHERE guild = $1 AND id = $2', [body.guild, body.id])
+            ctx.response.body = stringify({ success: true, messageId: msgRes.rows.message })
+        } else {
+            ctx.response.body = stringify({ success: false, error: 'No report found with that ID.' })
+        }
     } else {
-        ctx.response.body = stringify({ success: false, error: 'ID parameter was invalid.' })
+        ctx.response.body = stringify({ success: false, error: 'Invalid ID was submitted.' })
     }
 })
 
