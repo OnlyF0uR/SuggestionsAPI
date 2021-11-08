@@ -93,16 +93,18 @@ router.post('/setstatus', async (ctx: any) => {
     if (body.id.startsWith('s_')) {
         const res = await runQuery('UPDATE suggestions SET status = $1 WHERE guild = $2 AND id = $3', [body.status, body.guild, body.id])
         if (res.rowCount) {
-            const msgRes = await runQuery('SELECT message FROM suggestions WHERE guild = $1 AND id = $2', [body.guild, body.id])
-            ctx.response.body = stringify({ success: true, messageId: msgRes.rows.message })
+            const msgRes = await runQuery('SELECT message, channel FROM suggestions WHERE guild = $1 AND id = $2', [body.guild, body.id])
+            const data = (msgRes.rows as any[])[0]
+            ctx.response.body = stringify({ success: true, messageId: data.message, channelId: data.channel })
         } else {
             ctx.response.body = stringify({ success: false, error: 'No suggestion found with that ID.' })
         }
     } else if (body.id.startsWith('r_')) {
         const res = await runQuery('UPDATE reports SET status = $1 WHERE guild = $2 AND id = $3', [body.status, body.guild, body.id])
         if (res.rowCount) {
-            const msgRes = await runQuery('SELECT message FROM reports WHERE guild = $1 AND id = $2', [body.guild, body.id])
-            ctx.response.body = stringify({ success: true, messageId: msgRes.rows.message })
+            const msgRes = await runQuery('SELECT message, channel FROM reports WHERE guild = $1 AND id = $2', [body.guild, body.id])
+            const data = (msgRes.rows as any[])[0]
+            ctx.response.body = stringify({ success: true, messageId: data.message, channelId: data.channel })
         } else {
             ctx.response.body = stringify({ success: false, error: 'No report found with that ID.' })
         }
