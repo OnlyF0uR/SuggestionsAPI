@@ -114,6 +114,60 @@ router.post('/setstatus', async (ctx: any) => {
 })
 
 /*
+ * Move a suggestion/report to another channel
+ *
+ * Required json body:
+ *  - id
+ *  - guild
+ *  - channel
+ */
+router.post('/move', async (ctx: any) => {
+    // Get api key
+    const apiKey = ctx.request.headers.get('Api-Key')
+    // Check api key validity
+    if (apiKey == null || authTokens[apiKey] == null) {
+        ctx.response.body = stringify({ success: false, error: 'Invalid token.' })
+        return
+    }
+
+    const body = await ctx.request.body({ type: 'json' }).value
+    if (body.id == null || body.guild == null || body.channel == null) {
+        ctx.response.body = stringify({ success: false, error: 'Required body parameters were not given.' })
+        return
+    }
+
+    // Permission check
+    if (!authTokens[apiKey].global && !authTokens[apiKey].guilds.includes(body.guild)) {
+        ctx.response.body = stringify({ success: false, error: 'You cannot submit information for that guild.' })
+        return
+    }
+
+    if (body.id.startsWith('s_')) {
+        const oldRes = await runQuery('SELECT message, channel FROM suggestions WHERE guild = $1 AND id = $2', [body.guild, body.id])
+        if (oldRes.rowCount) {
+            const res = await runQuery('UPDATE suggestions SET channel = $1 WHERE guild = $2 AND id = $3', [body.channel, body.guild, body.id])
+            // Old data
+            const data = (oldRes.rows as any[])[0]
+            ctx.response.body = stringify({ success: true, messageId: data.message, channelId: data.channel })
+        } else {
+            ctx.response.body = stringify({ success: false, error: 'No suggestion found with that ID.' })
+        }
+    } else if (body.id.startsWith('r_')) {
+        const oldRes = await runQuery('SELECT message, channel FROM reports WHERE guild = $1 AND id = $2', [body.guild, body.id])
+        if (oldRes.rowCount) {
+            const res = await runQuery('UPDATE reports SET channel = $1 WHERE guild = $2 AND id = $3', [body.channel, body.guild, body.id])
+            // Old data
+            const data = (oldRes.rows as any[])[0]
+            ctx.response.body = stringify({ success: true, messageId: data.message, channelId: data.channel })
+        } else {
+            ctx.response.body = stringify({ success: false, error: 'No report found with that ID.' })
+        }
+    } else {
+        ctx.response.body = stringify({ success: false, error: 'Invalid ID was submitted.' })
+    }
+})
+
+/*
  * Submit an upvote for a suggestion
  *
  * Required json body:
