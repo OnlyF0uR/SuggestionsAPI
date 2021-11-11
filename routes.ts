@@ -119,7 +119,7 @@ router.post('/setstatus', async (ctx: any) => {
  * Required json body:
  *  - id
  *  - guild
- *  - messageid (new)
+ *  - message (new)
  *  - channel (new)
  */
 router.post('/move', async (ctx: any) => {
@@ -144,25 +144,21 @@ router.post('/move', async (ctx: any) => {
     }
 
     if (body.id.startsWith('s_')) {
-        const res = await runQuery('UPDATE suggestions SET channel = $1 WHERE guild = $2 AND id = $3', [body.channel, body.guild, body.id])
+        const res = await runQuery('UPDATE suggestions SET channel = $1, message = $2 WHERE guild = $3 AND id = $4', [body.channel, body.message, body.guild, body.id])
         // Just a safety check
         if (!res.rowCount) {
             ctx.response.body = stringify({ success: false })
-            return
+        } else {
+            ctx.response.body = stringify({ success: true })
         }
-
-        const data = (res.rows as any[])[0]
-        ctx.response.body = stringify({ success: true, messageId: data.message, channelId: data.channel })
     } else if (body.id.startsWith('r_')) {
-        const res = await runQuery('UPDATE reports SET channel = $1 WHERE guild = $2 AND id = $3', [body.channel, body.guild, body.id])
+        const res = await runQuery('UPDATE reports SET channel = $1, message = $2 WHERE guild = $3 AND id = $4', [body.channel, body.message, body.guild, body.id])
         // Just a safety check
         if (!res.rowCount) {
             ctx.response.body = stringify({ success: false })
-            return
+        } else {
+            ctx.response.body = stringify({ success: true })
         }
-
-        const data = (res.rows as any[])[0]
-        ctx.response.body = stringify({ success: true, messageId: data.message, channelId: data.channel })
     } else {
         ctx.response.body = stringify({ success: false, error: 'Invalid ID was submitted.' })
     }
