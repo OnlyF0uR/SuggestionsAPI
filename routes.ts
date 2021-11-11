@@ -114,12 +114,13 @@ router.post('/setstatus', async (ctx: any) => {
 })
 
 /*
- * Move a suggestion/report to another channel
+ * Move a suggestion/report to another channel, must always be combined with getting and validating data first
  *
  * Required json body:
  *  - id
  *  - guild
- *  - channel
+ *  - messageid (new)
+ *  - channel (new)
  */
 router.post('/move', async (ctx: any) => {
     // Get api key
@@ -143,25 +144,25 @@ router.post('/move', async (ctx: any) => {
     }
 
     if (body.id.startsWith('s_')) {
-        const oldRes = await runQuery('SELECT message, channel FROM suggestions WHERE guild = $1 AND id = $2', [body.guild, body.id])
-        if (oldRes.rowCount) {
-            const res = await runQuery('UPDATE suggestions SET channel = $1 WHERE guild = $2 AND id = $3', [body.channel, body.guild, body.id])
-            // Old data
-            const data = (oldRes.rows as any[])[0]
-            ctx.response.body = stringify({ success: true, messageId: data.message, channelId: data.channel })
-        } else {
-            ctx.response.body = stringify({ success: false, error: 'No suggestion found with that ID.' })
+        const res = await runQuery('UPDATE suggestions SET channel = $1 WHERE guild = $2 AND id = $3', [body.channel, body.guild, body.id])
+        // Just a safety check
+        if (!res.rowCount) {
+            ctx.response.body = stringify({ success: false })
+            return
         }
+
+        const data = (res.rows as any[])[0]
+        ctx.response.body = stringify({ success: true, messageId: data.message, channelId: data.channel })
     } else if (body.id.startsWith('r_')) {
-        const oldRes = await runQuery('SELECT message, channel FROM reports WHERE guild = $1 AND id = $2', [body.guild, body.id])
-        if (oldRes.rowCount) {
-            const res = await runQuery('UPDATE reports SET channel = $1 WHERE guild = $2 AND id = $3', [body.channel, body.guild, body.id])
-            // Old data
-            const data = (oldRes.rows as any[])[0]
-            ctx.response.body = stringify({ success: true, messageId: data.message, channelId: data.channel })
-        } else {
-            ctx.response.body = stringify({ success: false, error: 'No report found with that ID.' })
+        const res = await runQuery('UPDATE reports SET channel = $1 WHERE guild = $2 AND id = $3', [body.channel, body.guild, body.id])
+        // Just a safety check
+        if (!res.rowCount) {
+            ctx.response.body = stringify({ success: false })
+            return
         }
+
+        const data = (res.rows as any[])[0]
+        ctx.response.body = stringify({ success: true, messageId: data.message, channelId: data.channel })
     } else {
         ctx.response.body = stringify({ success: false, error: 'Invalid ID was submitted.' })
     }
@@ -310,11 +311,11 @@ router.get('/fetch/:guild_id/:id', async (ctx: any) => {
     if (ctx.params.id.startsWith('s_')) {
         // Get the suggestion from the database
         const res = await runQuery('SELECT * FROM suggestions WHERE guild = $1 AND id = $2', [ctx.params.guild_id, ctx.params.id])
-        ctx.response.body = res.rowCount == 0 ? stringify({ success: true, data: [] }) : stringify({ success: true, data: res.rows })
+        ctx.response.body = res.rowCount == 0 ? stringify({ success: false, error: 'ID parameter was invalid.' }) : stringify({ success: true, data: res.rows })
     } else if (ctx.params.id.startsWith('r_')) {
         // Get the report from the database
         const res = await runQuery('SELECT * FROM reports WHERE guild = $1 AND id = $2', [ctx.params.guild_id, ctx.params.id])
-        ctx.response.body = res.rowCount == 0 ? stringify({ success: true, data: [] }) : stringify({ success: true, data: res.rows })
+        ctx.response.body = res.rowCount == 0 ? stringify({ success: false, error: 'ID parameter was invalid.' }) : stringify({ success: true, data: res.rows })
     } else {
         ctx.response.body = stringify({ success: false, error: 'ID parameter was invalid.' })
     }
